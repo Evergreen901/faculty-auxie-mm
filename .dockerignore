@@ -1,0 +1,11 @@
+/cloudformation
+/examples
+/logs
+/node_modules
+*/node_modules
+/dist
+*/dist
+packages/tests
+.git
+*.md
+.gitignore

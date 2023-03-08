@@ -1,0 +1,37 @@
+{
+  "agent": {
+    "id": "MAGICBOX",
+    "name": "Gatherer",
+    "status": "started"
+  },
+  "environment": "dev",
+  "workplans": [
+    {
+      "tenantId": "StrankaXY",
+      "plugins": [
+        {
+          "pluginName": "LockExample"
+        }
+      ],
+      "subscriptions": [
+        {
+          "exchangeId": "ftx",
+          "symbol": "CRV/USD",
+          "dataPoint": "watchOrderBook",
+          "isPublic": false
+        },
+        {
+          "exchangeId": "ftx",
+          "symbol": "CRV/USD",
+          "dataPoint": "watchOrders",
+          "isPublic": false
+        },
+        {
+          "exchangeId": "ftx",
+          "dataPoint": "watchBalance",
+          "isPublic": false
+        }
+      ]
+    }
+  ]
+}

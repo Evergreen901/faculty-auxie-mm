@@ -1,0 +1,35 @@
+{
+  "private": true,
+  "workspaces": [
+    "packages/cmd",
+    "packages/utils",
+    "packages/gatherer",
+    "packages/executor",
+    "packages/magicbox",
+    "packages/dbsync",
+    "packages/apiserver",
+    "packages/tests"
+  ],
+  "name": "@fg/v42",
+  "version": "1.0.0",
+  "scripts": {
+    "copy-dev-envs": "cp ./envs/executor.dev.env ./packages/executor/.env && cp ./envs/gatherer.dev.env ./packages/gatherer/.env && cp ./envs/magicbox.dev.env ./packages/magicbox/.env && cp ./envs/dbsync.dev.env ./packages/dbsync/.env && cp ./envs/apiserver.dev.env ./packages/apiserver/.env",
+    "generate-deploy-package": "mkdir deploy && cp docker-compose-prod.yml deploy && mkdir deploy/envs && cp envs/apiserver.docker.env deploy/envs && cp envs/dbsync.docker.env deploy/envs && cp envs/executor.docker.env deploy/envs && cp envs/gatherer.docker.env deploy/envs && cp envs/magicbox.docker.env deploy/envs && cp envs/web.prod.env deploy/envs && mkdir deploy/docker && mkdir deploy/docker/redis && mkdir deploy/docker/web && cp docker/redis/redis.conf deploy/docker/redis && cp docker/redis/users.acl deploy/docker/redis && cp docker/web/nginx.conf deploy/docker/web && zip -r docker.zip docker && rm deploy -r",
+    "compile": "tsc --build --force tsconfig.json",
+    "cmd": "node packages/cmd",
+    "lint-fix": "eslint . --ext .ts --no-error-on-unmatched-pattern --fix",
+    "glogs": "docker-compose logs -f --tail=200 gatherer",
+    "blogs": "docker-compose logs -f --tail=200 magicbox",
+    "generate-keys": "ts-node ./packages/cmd/src/generate-keys.ts",
+    "encrypt": "ts-node ./packages/cmd/src/encrypt.ts"
+  },
+  "keywords": [],
+  "author": "dejand",
+  "license": "MIT",
+  "dependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.3.1",
+    "@typescript-eslint/parser": "^5.3.1",
+    "eslint": "^8.2.0",
+    "typescript": "^4.7.4"
+  }
+}

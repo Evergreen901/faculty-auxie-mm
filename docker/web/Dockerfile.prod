@@ -1,0 +1,17 @@
+# Build react app
+FROM node:16 AS build
+
+RUN mkdir /code
+ADD . /code/
+COPY ./envs/web.prod.env /code/packages/web/.env
+WORKDIR /code/packages/web
+RUN yarn --cwd /code/packages/web install --network-timeout 100000
+RUN yarn build
+
+# Build final image
+FROM nginx
+COPY --from=build /code/packages/web/build /usr/share/nginx/html
+RUN rm /etc/nginx/conf.d/default.conf
+COPY ./docker/web/nginx.conf /etc/nginx/conf.d/
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

@@ -1,0 +1,10 @@
+FROM node:16
+
+RUN mkdir /code
+ADD . /code/
+WORKDIR /code/packages/magicbox
+RUN npm install typescript --global  \
+  && yarn --cwd /code install \
+  && yarn install
+RUN yarn run build 
+CMD yarn run app

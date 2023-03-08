@@ -1,0 +1,5 @@
+user GATHERER on +@all resetchannels &__keyspace@0__:config.settings.GATHERER ~config.settings.GATHERER >foobared
+user MAGICBOX on +@all resetchannels &__keyspace@0__:config.settings.MAGICBOX ~config.settings.MAGICBOX >foobared
+user EXECUTOR on +@all resetchannels &__keyspace@0__:config.settings.EXECUTOR ~config.settings.EXECUTOR >foobared
+user DBSYNC   on +@all resetchannels &__keyspace@0__:config.settings.DBSYNC ~config.settings.DBSYNC >foobared
+user APISERVER on +@all resetchannels &__keyspace@0__:config.settings.APISERVER ~config.settings.* >foobared

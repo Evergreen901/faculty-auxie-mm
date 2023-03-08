@@ -1,0 +1,100 @@
+{
+    "agent": {
+      "id": "GATHERER",
+      "name": "Gatherer",
+      "status": "started"
+    },
+    "exchanges": {
+        "FGPUBLIC": {
+           "binance": {
+              
+           },
+           "ftx": {
+  
+           }
+       },
+  
+       "StrankaXY": {
+           "hitbtc": {
+              "apiKey": "cTkw_t8pBQtHLIx7nuoyND53gt35DM3Q",
+              "secret-plaintext": "eac5-vk2HQjg8w8aqDB6aAXEnuJRNQWk",
+              "secret": {
+                 "decrypt": "dHY1rHlQqATvHTK9MFPNzMtWXgItszf/C7XRjJQGvw49UgrEwXVJLmUO8NFOxJ2QeOAwT5ApnzsTr0fjw5Eg11Dli7k4gsL6I1FoAulq/9I7n63oNzZEQbOLBuT8uA7Tm/7M4khQUBkNsnvcIPNXkcrAT1nnWkChM53myOMevB1/kmr15HkeWlKKwHYYrrz+Vw78nhS3Nn9yLU7IFkYdTBq2ZbrFQPl5ZlTMGvrlNV8mwPieabflf3r+HXOKijXwkawMHDeeVye/ocIG1X3/axVYAyzAQj1KsP/CcNPbOipjGdQeNvgbfn492UD7OWo5t8JQX+QbO/yN4qcukC1Y/xDfuohYGUEQ+g2hVppK7ZBg6nQ4mQbj41gM53yUxEp67xswSRIR6utHU4S26NRYcDvcAKKLWvAQMZP8hVjEilax09xm3k5XYZLGIttWwLJQwhnr8hBhaf79ci9rUSUa9Go/U9UjsZfs8/EoCkrlsc2PwIkAI2vJrHJOi1OQpHGZEyWW+/RGEmRsp3DQE3EcQeP7pEMp1cc19lbIuthUMyOq9otohckjZimjkuDwqvnKeyJWJK09gLPV9zOYNcT7dDo8uZpD1NRFsqy/1X2LPI9CsTmZ46nYN4STAsxkaP3U8KQMP49IntducfKfodAkC1pU+DWIgtPFmq99qbXe9KA="
+              },
+              "test": true
+           },
+           "binance": {
+              "apiKey": "BN9galMztJyrezj5hv8UeVGE2Uvh30dVLYNmzN0S58OqIA0dAGbqRDWh90KGIuLm",
+              "secret": "KW7k6iI1miV9rqMWp1Ye3RfltotC9snb2Lvtji6wTdBSOg1Yg7wnbPrUE5frRrg6",
+              "test": true
+           },
+           "bitfinex": {
+              "apiKey": "o6YjbENOVXo6d3AIrTv6O7SG2YAU02kEyoO644AsnTD",
+              "secret": "GjN7QoMxetMvcux7Ean1Xnft2xm32v5sKlL1ChBf35x",
+              "test": false
+           },
+           "idex": {
+              "apiKey": "7adbd88e-580d-40d0-b7f3-0c30f5248d46",
+              "secret": "/AtV8FFmXBt9r+21dx8rQO6aobDT/Ae6",
+              "walletAddress": "0x094A59b184dD2F1e609587DB7E4a443DA990FA91",
+              "privateKey": "010ecc06ea63de692bccb3a2a74c73bbdebad38f4db58d70b0c248272045b5d0",
+              "test": true
+           },
+           "kucoin": {
+              "apiKey": "6321b0902b968a000153e485",
+              "secret": "43dc286f-2171-4009-bd97-c10b2c960557",
+              "password": "kucointest",
+              "test": true
+           },
+           "bitmart": {
+              "apiKey": "1503a9aa68d86a6324dfcd05bbb17affcc8be5f5",
+              "secret": "769f672f6a81f71baf2232a503e6969897b37b444064d56f801273ab955d138c",
+              "test": false
+           },
+           "gateio": {
+              "apiKey": "EBDEEAC5-C4BC-46AA-A4A5-C61CBA8E967A",
+              "secret": "440888e068cfb45eabfe4a30199f8b0d5161c82ea7d7393ee7f56944d860363d",
+              "test": false
+           },
+           "mexc": {
+              "apiKey": "mx0LdFMKCZyGmAWP4W",
+              "secret": "8c6d9985771f4f949cdd4b97cce0dbb3",
+              "test": false
+           },
+           "ascendex": {
+              "apiKey": "rc1JV7SJSBliaqUBJnHkswvoyfb6yauw",
+              "secret": "on8IdCA9Sd4pCuCd7Tm9dVSGeESyCkxpnNAcJEFzQZeskHtn9VC8KpmvSQNNB3My",
+              "test": false
+           }
+       }
+    },
+    "environment": "dev",
+    "workplans": [
+      {
+        "tenant": "StrankaXY",
+        "exchangeId": "binance",
+        "assetPairs": [
+          "BNB/BUSD"
+        ],
+        "dataPoints": [
+          "watchOrderBook",
+          "watchOrders",
+          "watchBalance",
+          "watchMyTrades"
+        ]
+      },
+      {
+        "tenant": "StrankaXY",
+        "exchangeId": "kucoin",
+        "assetPairs": [
+          "ETH/USDT"
+        ],
+        "dataPoints": [
+          "watchOrderBook",
+          "watchOrders",
+          "watchBalance",
+          "watchMyTrades"
+        ]
+      }
+    ]
+  }

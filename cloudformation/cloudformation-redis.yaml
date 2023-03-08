@@ -1,0 +1,102 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Resources:
+  GathererUser:
+    Type: AWS::MemoryDB::User
+    Properties:
+      UserName: GATHERER
+      AccessString:
+        on +@all resetchannels &__keyspace@0__:config.settings.GATHERER ~config.settings.GATHERER
+      AuthenticationMode: 
+        Passwords: '1234567890123456'
+        Type: password
+  MagicboxUser:
+    Type: AWS::MemoryDB::User
+    Properties:
+      UserName: MAGICBOX
+      AccessString:
+        on +@all resetchannels &__keyspace@0__:config.settings.MAGICBOX ~config.settings.MAGICBOX
+      AuthenticationMode: 
+        Passwords: '1234567890123456'
+        Type: password
+  ExecutorUser:
+    Type: AWS::MemoryDB::User
+    Properties:
+      UserName: EXECUTOR
+      AccessString:
+        on +@all resetchannels &__keyspace@0__:config.settings.EXECUTOR ~config.settings.EXECUTOR
+      AuthenticationMode: 
+        Passwords: '1234567890123456'
+        Type: password
+  DbsyncUser:
+    Type: AWS::MemoryDB::User
+    Properties:
+      UserName: DBSYNC
+      AccessString:
+        on +@all resetchannels &__keyspace@0__:config.settings.DBSYNC ~config.settings.DBSYNC
+      AuthenticationMode: 
+        Passwords: '1234567890123456'
+        Type: password
+  ApiserverUser:
+    Type: AWS::MemoryDB::User
+    Properties:
+      UserName: APISERVER
+      AccessString:
+        on +@all resetchannels &__keyspace@0__:config.settings.APISERVER ~config.settings.APISERVER
+
+  ArtisACL:
+    Type: AWS::MemoryDB::ACL
+    Properties:
+      ACLName: artis-acl
+      Usernames:
+        - !Ref GathererUser
+        - !Ref MagicboxUser
+        - !Ref ExecutorUser
+        - !Ref ApiserverUser
+        - !Ref DbsyncUser
+
+  ArtisParameterGroup:
+    Type: AWS::MemoryDB::ParameterGroup
+    Properties:
+      ParameterGroupName: artis-parameter-group
+      Family: memorydb_redis6
+
+  ArtisSubnetGroup:
+    Type: AWS::MemoryDB::SubnetGroup
+    Properties:
+      SubnetGroupName: artis-subnet-group
+      SubnetIds:
+        - subnet-xxxxxxxxxxxxxxxxx
+        - subnet-yyyyyyyyyyyyyyyyy
+        - subnet-zzzzzzzzzzzzzzzzz
+
+  RedisCluster:
+    Type: AWS::MemoryDB::Cluster
+    Properties: 
+      ClusterName: Artisv2
+      Description: Redis cluster for Artis v2
+      AutoMinorVersionUpgrade: True
+      EngineVersion: 6.2
+      ACLName: !Ref ArtisACL
+      NodeType: String
+
+      FinalSnapshotName: String
+      KmsKeyId: String
+      MaintenanceWindow: String
+      NumReplicasPerShard: Integer
+      NumShards: Integer
+      ParameterGroupName: String
+      Port: Integer
+      SecurityGroupIds: 
+        - String
+      SnapshotArns: 
+        - String
+      SnapshotName: String
+      SnapshotRetentionLimit: Integer
+      SnapshotWindow: String
+      SnsTopicArn: String
+      SnsTopicStatus: String
+      SubnetGroupName: String
+      Tags: 
+        - Tag
+      TLSEnabled: Boolean

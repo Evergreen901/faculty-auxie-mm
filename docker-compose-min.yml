@@ -1,0 +1,62 @@
+version: "3.3"
+
+services:
+  timescaledb:
+    image: timescale/timescaledb:latest-pg12
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Pa55w0rd
+    ports:
+      - "5432:5432"
+    volumes:
+      - db:/var/lib/postgresql/data
+
+  redis:
+    image: redis:6.2.5
+    volumes:
+      - ./docker/redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./docker/redis/users.acl:/usr/local/etc/redis/users.acl
+      - cache:/data
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - "6379:6379"
+  
+  webdis:
+    image: anapsix/webdis:latest
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    ports:  # allow connections from the Docker host on localhost, port 7379
+      - "7379:7379"
+
+  rediscmd:
+    image: rediscommander/redis-commander
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    ports:
+      - "8081:8081"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+      PGADMIN_CONFIG_SERVER_MODE: "True"
+    entrypoint:
+      - "/bin/sh"
+      - "-c"
+      - "/bin/echo 'timescaledb:5432:*:postgres:Pa55w0rd' > /tmp/pgpassfile && chmod 600 /tmp/pgpassfile && /entrypoint.sh"
+    ports:
+      - "8082:80"
+    volumes:
+      - ./docker/postgres/servers.json:/pgadmin4/servers.json
+    depends_on:
+      - timescaledb
+
+volumes:
+  elasticseach:
+  cache:
+  db:
+

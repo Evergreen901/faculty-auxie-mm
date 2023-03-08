@@ -1,0 +1,18 @@
+version: "3.3"
+
+services:      
+  magicbox:
+    build:
+      context: ./
+      dockerfile: docker/magicbox/Dockerfile
+    volumes:
+      - ./packages/magicbox/src:/code/packages/magicbox/src
+      - ./packages/utils/src:/code/packages/utils/src
+      - c:/ArtisPlugins:/code/packages/magicbox/src/dist/plugins
+    env_file:
+      - ./envs/magicbox.docker.env
+    secrets:
+      - decrypt_key
+secrets:
+  decrypt_key:
+    file: private.pem

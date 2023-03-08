@@ -1,0 +1,33 @@
+{
+  "references": [
+    {
+      "path": "./packages/utils"
+    },
+    {
+      "path": "./packages/cmd"
+    },
+    {
+      "path": "./packages/gatherer"
+    },
+    {
+      "path": "./packages/executor"
+    },
+    {
+      "path": "./packages/magicbox"
+    },
+    {
+        "path": "./packages/dbsync"
+    },
+    {
+      "path": "./packages/apiserver"
+    },
+    {
+      "path": "./packages/tests"
+    }
+  ],
+
+  "files": [],
+  "exclude": [
+    "**/node_modules", 
+  ]
+}

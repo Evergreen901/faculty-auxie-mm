@@ -1,0 +1,20 @@
+{
+  "private": true,
+  "main": "dist/index",
+  "types": "dist/index",
+  "name": "@fg/cmd",
+  "version": "1.0.0",
+  "dependencies": {
+    "@fg/utils": "1.0.0",
+    "ccxt": "^2.1.79",
+    "nodemon": "^2.0.15",
+    "ts-node-dev": "^2.0.0"
+  },
+  "scripts": {
+    "compile": "tsc --build --force tsconfig.json",
+    "app": "node dist",
+    "app-watch": "nodemon",
+    "app-dev": "nodemon --config nodemon-debug.json",
+    "app-brk": "nodemon --config nodemon-debug-brk.json"
+  }
+}

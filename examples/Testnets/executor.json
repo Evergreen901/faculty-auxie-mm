@@ -1,0 +1,67 @@
+{
+    "agent": {
+      "id": "EXECUTOR",
+      "name": "Gatherer",
+      "status": "started"
+    },
+    "environment": "dev",
+    "exchanges": {
+      "FGPUBLIC": {
+        "binance": {},
+        "ftx": {}
+      },
+      "StrankaXY": {
+        "hitbtc": {
+          "apiKey": "cTkw_t8pBQtHLIx7nuoyND53gt35DM3Q",
+          "secret-original": "eac5-vk2HQjg8w8aqDB6aAXEnuJRNQWk",
+          "secret": {
+            "decrypt": "kAPWmNvZwribWPMhoyCNW87t/P4F8LPG2Vn7MrQ4NYOGS+lW+yH3WrIk5iXJ5bgzKUm5j+NVZWvANxjUvw/VSLOIQt7IPEIyG8sG6Rd0AhpJhon5AkkvuvMdydn/4Mzo+nDM6WvucQrazM3GctW4tn1PzxJJdR0tkHudhgForuGNpO74EOMz8ohb6AyzNXgnXQq2mazEuaSRQY6KUV7YEdJE+HB7bGCFimXKPkRTf+THbWQp/gzLnc8KZtiMi1Ite/IHPgScK/uLEoDwREsnn6fOExnxcohc8fphfzVQf01n4yv2Jar+83tyo/pqoR8eVUZTDRgPS20STYn3bsTo0y6gmx8VJGWFOwsmN+XiGzTLInlMMVUDx3QFqcGTNv14ufspbj7Kh07TPyAim5jlikqMGYulS8B7GfCkrItDtAsORkqq5fy/7ounFhisotuQEDBp2D2FaakSXz2hgRZicG25hc44wYUmKvXUHeclRTe+mS32bLcAAzTDYcMxwzTwHslPkckDElgtWvtMUjdmcC7cvvakCfJuZmYmNig9LS6g7Xd/ZCRwOHkTG6Wh3YpQVo0nB7nhYks9tQCJFz/YqRevMQeb9dR9p4RLSFD6MWuG01BXmsoTgzFCOOg59U6JFATSBBZMxOUMekoxlZ6B1iH7vZ0IM2konvaZcOrs/B0="
+          },
+          "test": true
+        },
+        "binance": {
+          "apiKey": "BN9galMztJyrezj5hv8UeVGE2Uvh30dVLYNmzN0S58OqIA0dAGbqRDWh90KGIuLm",
+          "secret": "KW7k6iI1miV9rqMWp1Ye3RfltotC9snb2Lvtji6wTdBSOg1Yg7wnbPrUE5frRrg6",
+          "test": true
+        },
+        "bitfinex": {
+          "apiKey": "o6YjbENOVXo6d3AIrTv6O7SG2YAU02kEyoO644AsnTD",
+          "secret": "GjN7QoMxetMvcux7Ean1Xnft2xm32v5sKlL1ChBf35x",
+          "test": false
+        },
+        "idex": {
+          "apiKey": "7adbd88e-580d-40d0-b7f3-0c30f5248d46",
+          "secret": "/AtV8FFmXBt9r 21dx8rQO6aobDT/Ae6",
+          "walletAddress": "0x094A59b184dD2F1e609587DB7E4a443DA990FA91",
+          "privateKey": "010ecc06ea63de692bccb3a2a74c73bbdebad38f4db58d70b0c248272045b5d0",
+          "test": true
+        },
+        "kucoin": {
+          "apiKey": "6321b0902b968a000153e485",
+          "secret": "43dc286f-2171-4009-bd97-c10b2c960557",
+          "password": "kucointest",
+          "test": true
+        },
+        "bitmart": {
+          "apiKey": "1503a9aa68d86a6324dfcd05bbb17affcc8be5f5",
+          "secret": "769f672f6a81f71baf2232a503e6969897b37b444064d56f801273ab955d138c",
+          "test": false
+        },
+        "gateio": {
+          "apiKey": "EBDEEAC5-C4BC-46AA-A4A5-C61CBA8E967A",
+          "secret": "440888e068cfb45eabfe4a30199f8b0d5161c82ea7d7393ee7f56944d860363d",
+          "test": false
+        },
+        "mexc": {
+          "apiKey": "mx0LdFMKCZyGmAWP4W",
+          "secret": "8c6d9985771f4f949cdd4b97cce0dbb3",
+          "test": false
+        },
+        "ascendex": {
+          "apiKey": "rc1JV7SJSBliaqUBJnHkswvoyfb6yauw",
+          "secret": "on8IdCA9Sd4pCuCd7Tm9dVSGeESyCkxpnNAcJEFzQZeskHtn9VC8KpmvSQNNB3My",
+          "test": false
+        }
+      }
+    }
+  }

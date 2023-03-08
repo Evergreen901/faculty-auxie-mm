@@ -1,0 +1,6 @@
+{
+    "watch": ["src", "../utils/src"],
+    "ext": "ts,json",
+    "ignore": ["src/**/*.spec.ts"],
+    "exec": "tsc --build --force tsconfig.json && ts-node-dev --inspect-brk=0.0.0.0 src/index.ts"  
+  }

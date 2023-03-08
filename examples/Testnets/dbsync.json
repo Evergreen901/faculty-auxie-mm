@@ -1,0 +1,23 @@
+{
+    "agent": {
+      "id": "DBSYNC",
+      "name": "Gatherer",
+      "status": "started"
+    },
+    "environment": "dev",
+    "workplans": [
+      {
+        "tenantId": "StrankaXY",
+        "assets": [
+          "stream.StrankaXY.binance.watchOrderBook.BNB/BUSD",
+          "stream.StrankaXY.binance.watchOrders.BNB/BUSD",
+          "stream.StrankaXY.binance.watchBalance",
+          "stream.StrankaXY.binance.watchMyTrades.BNB/BUSD",
+          "stream.StrankaXY.kucoin.watchOrderBook.ETH/USDT",
+          "stream.StrankaXY.kucoin.watchOrders.ETH/USDT",
+          "stream.StrankaXY.kucoin.watchBalance",
+          "stream.StrankaXY.kucoin.watchMyTrades.ETH/USDT"
+        ]
+      }
+    ]
+  }

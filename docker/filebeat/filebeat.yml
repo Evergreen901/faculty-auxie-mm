@@ -1,0 +1,17 @@
+filebeat.inputs:
+  - type: log
+    enabled: true
+    paths:
+      - /logs/*.log
+    json.keys_under_root: false
+    json.overwrite_keys: true
+    json.add_error_key: true
+    json.expand_keys: true
+
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+  #username: "elastic"
+  #password: "elastic"
+
+setup.kibana:
+  host: "kibana:5601"

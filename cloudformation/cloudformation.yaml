@@ -1,0 +1,296 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Artis V2 stack
+
+##
+# This Cloudformation template creates:
+# - one docker repository for each microservice in the Artis V2 project
+# - A user with permission to push new images into these repositories
+# - API KEY for this user to be configured on bitbucket
+# The api key and secret can be retrieved after deploy on cloudformation outputs.
+##
+Parameters:
+  EC2KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the EC2 instance
+    Default: ARTIS-Backend-v2
+  HostedZoneId:
+    Type: AWS::Route53::HostedZone::Id
+    Description: Hosted zone ID of the domain (found on Route 53)
+    Default: Z036291932S29QFJIP55T # artis.systems
+  Domain:
+    Type: String
+    Description: The final domain for the server
+    Default: prodv2.artis.systems
+  AMI:
+    Type: AWS::EC2::Image::Id
+    Description: Amazon Linux 2 AMI (HVM) - Kernel 5.10, SSD Volume Type
+    Default: ami-070b208e993b59cea # amzn2-ami-kernel-5.10-hvm-2.0.20221004.0-x86_64-gp2
+    # ami-089a545a9ed9893b6
+
+
+Resources:
+  # Policy to allow connection to ECR
+  AllowGetAuthTokenPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub "${AWS::StackName}-AllowGetAuthToken"
+      Users:
+        - !Ref BitbucketDeployer
+      Roles:
+        - !Ref ECRInstanceRole
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action:
+            - ecr:GetAuthorizationToken
+          Resource:
+            - '*'
+      
+  # Policy to allow read on artis containers
+  ECRAllowGetImagesPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub "${AWS::StackName}-ECRAllowGetImages"
+      Users:
+        - !Ref BitbucketDeployer
+      Roles:
+        - !Ref ECRInstanceRole
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action:
+            - ecr:BatchCheckLayerAvailability
+            - ecr:GetDownloadUrlForLayer
+            - ecr:GetRepositoryPolicy
+            - ecr:DescribeRepositories
+            - ecr:ListImages
+            - ecr:DescribeImages
+            - ecr:BatchGetImage
+          Resource:
+            - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/artis-*
+
+  # Policy to allow write on artis containers
+  ECRAllowPushImagesPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub "${AWS::StackName}-ECRAllowPushImages"
+      Users:
+        - !Ref BitbucketDeployer
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action:
+            - ecr:InitiateLayerUpload
+            - ecr:UploadLayerPart
+            - ecr:CompleteLayerUpload
+            - ecr:PutImage
+          Resource:
+            - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/artis-*
+
+  # Creates EC2 role with permission for buckets
+  ECRInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal: 
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - sts:AssumeRole
+        
+  # Creates bitbucket user with permission to push docker images to ECR
+  BitbucketDeployer:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: artis-bitbucket
+
+  # Creates an API KEY for this user
+  BitbucketDeployerApiKey:
+    Type: AWS::IAM::AccessKey
+    Properties: 
+      Serial: 1 # NOTE: to rotate the secret key, increment this number
+      Status: Active
+      UserName: !Ref BitbucketDeployer
+
+  # Creates the ECR repositories for the microservices
+  GathererRepo:
+    Type: AWS::ECR::Repository
+    Properties: 
+      RepositoryName: artis-gatherer
+      EncryptionConfiguration: 
+        EncryptionType: AES256
+      ImageScanningConfiguration: 
+        ScanOnPush: False
+      ImageTagMutability: MUTABLE
+  ExecutorRepo:
+    Type: AWS::ECR::Repository
+    Properties: 
+      RepositoryName: artis-executor
+      EncryptionConfiguration: 
+        EncryptionType: AES256
+      ImageScanningConfiguration: 
+        ScanOnPush: False
+      ImageTagMutability: MUTABLE
+  MagicboxRepo:
+    Type: AWS::ECR::Repository
+    Properties: 
+      RepositoryName: artis-magicbox
+      EncryptionConfiguration: 
+        EncryptionType: AES256
+      ImageScanningConfiguration: 
+        ScanOnPush: False
+      ImageTagMutability: MUTABLE
+  DbsyncRepo:
+    Type: AWS::ECR::Repository
+    Properties: 
+      RepositoryName: artis-dbsync
+      EncryptionConfiguration: 
+        EncryptionType: AES256
+      ImageScanningConfiguration: 
+        ScanOnPush: False
+      ImageTagMutability: MUTABLE
+  WebRepo:
+    Type: AWS::ECR::Repository
+    Properties: 
+      EncryptionConfiguration: 
+        EncryptionType: AES256
+      ImageScanningConfiguration: 
+        ScanOnPush: False
+      ImageTagMutability: MUTABLE
+      RepositoryName: artis-web
+  ApiserverRepo:
+    Type: AWS::ECR::Repository
+    Properties: 
+      EncryptionConfiguration: 
+        EncryptionType: AES256
+      ImageScanningConfiguration: 
+        ScanOnPush: False
+      ImageTagMutability: MUTABLE
+      RepositoryName: artis-apiserver
+
+  # EC2 profile to link EC2 server with the role created
+  ArtisServerInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Sub ${AWS::StackName}-ArtisServerProfile
+      Roles:
+        - !Ref ECRInstanceRole
+
+  # Actual EC2 server with script to install docker
+  ArtisServerEC2:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t3.large
+      EbsOptimized: true
+      IamInstanceProfile: !Ref ArtisServerInstanceProfile
+      ImageId: !Ref AMI
+      InstanceInitiatedShutdownBehavior: stop
+      KeyName: !Ref EC2KeyName
+      SecurityGroups:
+        - !Ref ArtisServerSG
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeType: gp3
+            VolumeSize: '600'
+            DeleteOnTermination: 'true'
+            Encrypted: 'true'
+      Tags:
+        - Key: "Name"
+          Value: !Ref Domain
+      UserData: 
+        Fn::Base64: 
+          !Sub |
+            #!/bin/bash
+            yum update -y
+            amazon-linux-extras install docker
+            service docker start
+            systemctl enable docker
+            usermod -a -G docker ec2-user
+            curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+            chmod +x /usr/local/bin/docker-compose
+            wget https://faculty-public.s3.us-east-2.amazonaws.com/docker-compose-prod.yml
+
+  # Elastic IP to prevent IP changes in case of server restart
+  ArtisServerElasticIp:
+    Type: AWS::EC2::EIP
+    Properties:
+      InstanceId: !Ref ArtisServerEC2
+      Tags:
+        - Key: "Name"
+          Value: !Ref Domain
+
+  # Associate the elastic ip with the EC2 server
+  ArtisServerElasticIpAssociation:
+    Type: AWS::EC2::EIPAssociation
+    Properties: 
+      EIP: !Ref ArtisServerElasticIp
+      InstanceId: !Ref ArtisServerEC2
+
+  # DNS entry to link domain with elastic ip
+  DomainConfig:
+    Type: AWS::Route53::RecordSetGroup
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      RecordSets:
+        - Name: !Ref Domain
+          TTL: '300'
+          Type: A
+          ResourceRecords:
+            - !GetAtt ArtisServerEC2.PublicIp
+    DependsOn:
+      - ArtisServerEC2
+      - ArtisServerElasticIp
+      - ArtisServerElasticIpAssociation
+
+
+  # Allow SSH (one ip only) and HTTP (open to public) to server
+  ArtisServerSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable SSH to ip of administrator
+      SecurityGroupIngress:
+      - CidrIp: 95.90.195.151/32 # Guilherme IP
+        FromPort: 22
+        ToPort: 22
+        IpProtocol: tcp
+      - CidrIp: 0.0.0.0/0 # Open to public
+        FromPort: 3000
+        ToPort: 3000
+        IpProtocol: tcp
+
+# Outputs all the information necessary to configure in other services
+Outputs:
+  BitbucketDeployerArn:
+    Description: ARN of the user created for bitbucket
+    Value: !GetAtt BitbucketDeployer.Arn
+  BitbucketDeployerAccessKey:
+    Description: Access key of the bitbucket user 
+    Value: !Ref BitbucketDeployerApiKey
+  BitbucketDeployerSecretKey:
+    Description: Secret key of the bitbucket user 
+    Value: !GetAtt BitbucketDeployerApiKey.SecretAccessKey
+  GathererUri:
+    Description: URI for the gatherer repository
+    Value: !GetAtt GathererRepo.RepositoryUri
+  ExecutorUri:
+    Description: URI for the executor repository
+    Value: !GetAtt ExecutorRepo.RepositoryUri
+  MagicboxUri:
+    Description: URI for the magicbox repository
+    Value: !GetAtt MagicboxRepo.RepositoryUri
+  DbsyncUri:
+    Description: URI for the dbsync repository
+    Value: !GetAtt DbsyncRepo.RepositoryUri
+  WebUri:
+    Description: URI for the web repository
+    Value: !GetAtt WebRepo.RepositoryUri
+  ApiserverUri:
+    Description: URI for the apiserver repository
+    Value: !GetAtt ApiserverRepo.RepositoryUri    

@@ -1,0 +1,7 @@
+user GATHERER on +@all resetchannels &__keyspace@0__:config.settings.GATHERER ~*StrankaXY* ~*FGPUBLIC*  ~config.settings.GATHERER >foobared
+user MAGICBOX on +@all resetchannels &StrankaXY.traderActions &FGPUBLIC.traderActions &__keyspace@0__:config.settings.MAGICBOX ~*StrankaXY* ~*FGPUBLIC* ~config.settings.MAGICBOX >foobared
+user EXECUTOR on +@all resetchannels &StrankaXY.traderActions &FGPUBLIC.traderActions &stream.StrankaXY.*.watchOrders.* &stream.FGPUBLIC.*.watchOrders.* ~*StrankaXY.* ~*FGPUBLIC.* &__keyspace@0__:config.settings.EXECUTOR ~config.settings.EXECUTOR >foobared
+user SamplePlugin on +@all resetchannels &__keyspace@0__:publish.StrankaXY.SamplePlugin.* ~publish.StrankaXY.SamplePlugin.* >foobared
+user DBSYNC on +@all resetchannels &__keyspace@0__:config.settings.DBSYNC ~*StrankaXY* ~*FGPUBLIC* ~config.settings.DBSYNC >foobared
+user APISERVER on +@all resetchannels &__keyspace@0__:config.settings.APISERVER &StrankaXY.traderActions ~*StrankaXY* ~*FGPUBLIC* ~config.settings.* >foobared
+user MY_TRADER on +@all resetchannels &MY_TRADER.* ~MY_TRADER.* >mypass

@@ -1,0 +1,60 @@
+image: docker/compose
+
+options:
+  docker: true
+
+definitions:
+  steps:
+    - step: &build_and_push_to_ecr
+        name: Build images
+        script:
+          - docker-compose --file docker-compose-prod.yml build
+          - docker image ls
+          - pipe: "atlassian/aws-ecr-push-image:1.6.2"
+            variables:
+              AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY
+              AWS_SECRET_ACCESS_KEY: $AWS_SECRET_KEY
+              AWS_DEFAULT_REGION: $AWS_REGION
+              IMAGE_NAME: artis-gatherer:latest
+          - pipe: "atlassian/aws-ecr-push-image:1.6.2"
+            variables:
+              AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY
+              AWS_SECRET_ACCESS_KEY: $AWS_SECRET_KEY
+              AWS_DEFAULT_REGION: $AWS_REGION
+              IMAGE_NAME: artis-executor:latest
+          - pipe: "atlassian/aws-ecr-push-image:1.6.2"
+            variables:
+              AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY
+              AWS_SECRET_ACCESS_KEY: $AWS_SECRET_KEY
+              AWS_DEFAULT_REGION: $AWS_REGION
+              IMAGE_NAME: artis-magicbox:latest
+          - pipe: "atlassian/aws-ecr-push-image:1.6.2"
+            variables:
+              AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY
+              AWS_SECRET_ACCESS_KEY: $AWS_SECRET_KEY
+              AWS_DEFAULT_REGION: $AWS_REGION
+              IMAGE_NAME: artis-dbsync:latest
+          - pipe: "atlassian/aws-ecr-push-image:1.6.2"
+            variables:
+              AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY
+              AWS_SECRET_ACCESS_KEY: $AWS_SECRET_KEY
+              AWS_DEFAULT_REGION: $AWS_REGION
+              IMAGE_NAME: artis-apiserver:latest
+          - pipe: "atlassian/aws-ecr-push-image:1.6.2"
+            variables:
+              AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY
+              AWS_SECRET_ACCESS_KEY: $AWS_SECRET_KEY
+              AWS_DEFAULT_REGION: $AWS_REGION
+              IMAGE_NAME: artis-web:latest
+        services:
+          - docker
+        caches:
+          - docker
+
+pipelines:
+  custom:
+    deploy:
+      - step: *build_and_push_to_ecr
+  branches:
+    master:
+      - step: *build_and_push_to_ecr

@@ -1,0 +1,182 @@
+version: "3.3"
+
+services:
+  gatherer:
+    image: artis-gatherer:latest
+    build:
+      context: ./
+      dockerfile: docker/gatherer/Dockerfile.prod
+    volumes:
+      - ./logs:/code/packages/gatherer/logs
+    env_file:
+      - ./envs/gatherer.docker.env
+    depends_on:
+      - redis
+    secrets:
+      - decrypt_key
+
+  executor:
+    image: artis-executor:latest
+    build:
+      context: ./
+      dockerfile: docker/executor/Dockerfile.prod
+    env_file:
+      - ./envs/executor.docker.env
+    depends_on:
+      - redis
+      - gatherer
+    secrets:
+      - decrypt_key
+
+  magicbox:
+    image: artis-magicbox:latest
+    build:
+      context: ./
+      dockerfile: docker/magicbox/Dockerfile.prod
+    env_file:
+      - ./envs/magicbox.docker.env
+    depends_on:
+      - redis
+      - executor
+    secrets:
+      - decrypt_key
+
+  dbsync:
+    image: artis-dbsync:latest
+    build:
+      context: ./
+      dockerfile: docker/dbsync/Dockerfile.prod
+    env_file:
+      - ./envs/dbsync.docker.env
+    depends_on:
+      - redis
+      - timescaledb
+      - magicbox
+    secrets:
+      - decrypt_key
+
+  apiserver:
+    image: artis-apiserver:latest
+    build:
+      context: ./
+      dockerfile: docker/apiserver/Dockerfile.prod
+    env_file:
+      - ./envs/apiserver.docker.env
+    depends_on:
+      - redis
+      - timescaledb
+      - dbsync
+    secrets:
+      - decrypt_key
+
+  web:
+    image: artis-web:latest
+    build:
+      context: ./
+      dockerfile: docker/web/Dockerfile.prod
+    ports:
+      - "3000:80"
+    volumes:
+      - ./public.pem:/usr/share/nginx/html/public.pem
+      - ./.htpasswd:/etc/nginx/.htpasswd
+    env_file:
+      - ./envs/web.prod.env
+    depends_on:
+      - webdis
+
+  webdis:
+    image: anapsix/webdis:latest
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - redis
+    # ports:  # allow connections from the Docker host on localhost, port 7379
+    #  - "7379:7379"
+
+  keycloak:
+    image: jboss/keycloak
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+    environment:
+      DB_VENDOR: POSTGRES
+      DB_ADDR: timescaledb
+      DB_DATABASE: postgres
+      DB_USER: postgres
+      DB_SCHEMA: public
+      DB_PASSWORD: Pa55w0rd
+      PROXY_ADDRESS_FORWARDING: "true"
+      KEYCLOAK_USER: keycloak_admin
+      KEYCLOAK_PASSWORD: Pa55w0rd
+
+  timescaledb:
+    image: timescale/timescaledb:latest-pg12
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Pa55w0rd
+    volumes:
+      - db:/var/lib/postgresql/data
+
+  redis:
+    image: redis:6.2.5
+    volumes:
+      - ./docker/redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./docker/redis/users.prod.acl:/usr/local/etc/redis/users.acl
+      - cache:/data
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - "6379:6379"
+
+  rediscmd:
+    image: rediscommander/redis-commander
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    ports:
+      - "8081:8081"
+
+  # filebeat:
+  #   image: docker.elastic.co/beats/filebeat:7.14.2
+  #   user: root
+  #   volumes:
+  #     - ./docker/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+  #     - ./logs:/logs
+  #   environment:
+  #     - ELASTICSEARCH_HOST=elasticsearch
+  #     - KIBANA_HOST=kibana
+  #     - ELASTICSEARCH_USERNAME=elastic
+  #     - ELASTICSEARCH_PASSWORD=elastic
+  #   command: ["--strict.perms=false"]
+
+  # elasticsearch:
+  #   image: elasticsearch:7.14.2
+  #   ports:
+  #     - "9200:9200"
+  #     - "9300:9300"
+  #   environment:
+  #     ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+  #     XPACK_SECURITY_ENABLED: "false"
+  #     ELASTIC_USERNAME: elastic
+  #     ELASTIC_PASSWORD: elastic
+  #     #ELASTIC_PASSWORD: Pa55w0rd
+  #     # Use single node discovery in order to disable production mode and avoid bootstrap checks.
+  #     # see: https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
+  #     discovery.type: single-node
+
+  # kibana:
+  #   image: kibana:7.14.2
+  #   ports:
+  #     - "5601:5601"
+  #   environment:
+  #     ELASTICSEARCH_URL: elastic:elastic@elasticsearch:9200
+  #     ELASTICSEARCH_HOSTS: 'http://elastic:elastic@elasticsearch:9200'
+
+volumes:
+  elasticseach:
+  cache:
+  db:
+
+secrets:
+  decrypt_key:
+    file: private.pem

@@ -1,0 +1,218 @@
+version: "3.3"
+
+services:
+  gatherer:
+    build:
+      context: ./
+      dockerfile: docker/gatherer/Dockerfile
+    volumes:
+      - ./packages/gatherer/src:/code/packages/gatherer/src
+      - ./packages/utils/src:/code/packages/utils/src
+      - ./logs:/code/packages/gatherer/logs
+    env_file:
+      - ./envs/gatherer.docker.env
+    depends_on:
+      - redis
+    secrets:
+      - decrypt_key
+
+  executor:
+    build:
+      context: ./
+      dockerfile: docker/executor/Dockerfile
+    volumes:
+      - ./packages/executor/src:/code/packages/executor/src
+      - ./packages/utils/src:/code/packages/utils/src
+    env_file:
+      - ./envs/executor.docker.env
+    depends_on:
+      - redis
+      - gatherer
+    secrets:
+      - decrypt_key
+    ports:
+      - "8086:8086"
+
+  magicbox:
+    build:
+      context: ./
+      dockerfile: docker/magicbox/Dockerfile
+    volumes:
+      - ./packages/magicbox/src:/code/packages/magicbox/src
+      - ./packages/utils/src:/code/packages/utils/src
+    env_file:
+      - ./envs/magicbox.docker.env
+    depends_on:
+      - redis
+      - executor
+    secrets:
+      - decrypt_key
+
+  dbsync:
+    build:
+      context: ./
+      dockerfile: docker/dbsync/Dockerfile
+    volumes:
+      - ./packages/dbsync/src:/code/packages/dbsync/src
+      - ./packages/utils/src:/code/packages/utils/src
+      - ./envs:/code/envs
+    env_file:
+      - ./envs/dbsync.docker.env
+    depends_on:
+      - redis
+      - timescaledb
+      - magicbox
+    secrets:
+      - decrypt_key
+
+  apiserver:
+    build:
+      context: ./
+      dockerfile: docker/apiserver/Dockerfile
+    volumes:
+      - ./packages/apiserver/src:/code/packages/apiserver/src
+      - ./packages/utils/src:/code/packages/utils/src
+      - ./envs:/code/envs
+    env_file:
+      - ./envs/apiserver.docker.env
+    depends_on:
+      - redis
+      - timescaledb
+      - dbsync
+    ports:
+      - "8085:8085"
+    secrets:
+      - decrypt_key
+
+  web:
+    build:
+      context: ./
+      dockerfile: docker/web/Dockerfile
+    volumes:
+      - ./packages/web/src:/code/packages/web/src
+      - ./public.pem:/code/packages/web/public/public.pem
+    env_file:
+      - ./envs/web.docker.env
+    ports:
+      - "3000:3000"
+    depends_on:
+      - webdis
+    secrets:
+      - decrypt_key
+
+  webdis:
+    image: anapsix/webdis:latest
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - redis
+    ports:  # allow connections from the Docker host on localhost, port 7379
+      - "7379:7379"
+
+  # keycloak:
+  #   image: jboss/keycloak
+  #   ports:
+  #     - "8080:8080"
+  #     - "8443:8443"
+  #   environment:
+  #     DB_VENDOR: POSTGRES
+  #     DB_ADDR: timescaledb
+  #     DB_DATABASE: postgres
+  #     DB_USER: postgres
+  #     DB_SCHEMA: public
+  #     DB_PASSWORD: Pa55w0rd
+  #     PROXY_ADDRESS_FORWARDING: "true"
+  #     KEYCLOAK_USER: keycloak_admin
+  #     KEYCLOAK_PASSWORD: Pa55w0rd
+
+  timescaledb:
+    image: timescale/timescaledb:latest-pg12
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Pa55w0rd
+    ports:
+      - "5432:5432"
+    volumes:
+      - db:/var/lib/postgresql/data
+
+  # pgadmin:
+  #   image: dpage/pgadmin4
+  #   restart: always
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: admin@admin.com
+  #     PGADMIN_DEFAULT_PASSWORD: root
+  #     PGADMIN_CONFIG_SERVER_MODE: "True"
+  #   entrypoint:
+  #     - "/bin/sh"
+  #     - "-c"
+  #     - "/bin/echo 'timescaledb:5432:*:postgres:Pa55w0rd' > /tmp/pgpassfile && chmod 600 /tmp/pgpassfile && /entrypoint.sh"
+  #   ports:
+  #     - "8082:80"
+  #   volumes:
+  #     - ./docker/postgres/servers.json:/pgadmin4/servers.json
+  #   depends_on:
+  #     - timescaledb
+
+  redis:
+    image: redis:6.2.5
+    volumes:
+      - ./docker/redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./docker/redis/users.acl:/usr/local/etc/redis/users.acl
+      - cache:/data
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - "6379:6379"
+
+  rediscmd:
+    image: rediscommander/redis-commander
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    ports:
+      - "8081:8081"
+
+  # filebeat:
+  #   image: docker.elastic.co/beats/filebeat:7.14.2
+  #   user: root
+  #   volumes:
+  #     - ./docker/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+  #     - ./logs:/logs
+  #   environment:
+  #     - ELASTICSEARCH_HOST=elasticsearch
+  #     - KIBANA_HOST=kibana
+  #     - ELASTICSEARCH_USERNAME=elastic
+  #     - ELASTICSEARCH_PASSWORD=elastic
+  #   command: ["--strict.perms=false"]
+
+  # elasticsearch:
+  #   image: elasticsearch:7.14.2
+  #   ports:
+  #     - "9200:9200"
+  #     - "9300:9300"
+  #   environment:
+  #     ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+  #     XPACK_SECURITY_ENABLED: "false"
+  #     ELASTIC_USERNAME: elastic
+  #     ELASTIC_PASSWORD: elastic
+  #     #ELASTIC_PASSWORD: Pa55w0rd
+  #     # Use single node discovery in order to disable production mode and avoid bootstrap checks.
+  #     # see: https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
+  #     discovery.type: single-node
+
+  # kibana:
+  #   image: kibana:7.14.2
+  #   ports:
+  #     - "5601:5601"
+  #   environment:
+  #     ELASTICSEARCH_URL: elastic:elastic@elasticsearch:9200
+  #     ELASTICSEARCH_HOSTS: 'http://elastic:elastic@elasticsearch:9200'
+
+volumes:
+  elasticseach:
+  cache:
+  db:
+
+secrets:
+  decrypt_key:
+    file: private.pem
